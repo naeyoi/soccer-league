@@ -14,16 +14,27 @@ public class TeamRepository : ITeamRepository
         _context = context;
     }
 
-    public async Task<Team?> GetByIdAsync(int id)
+    public async Task<Team?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _context.Teams
             .Include(t => t.Leagues)
-            .FirstOrDefaultAsync(t => t.Id == id);
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Team>> GetByIdsAsync(
+        IReadOnlyCollection<int> ids,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Teams
+            .Where(team => ids.Contains(team.Id))
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<Team>> GetAllAsync()
     {
-        return await _context.Teams.ToListAsync();
+        return await _context.Teams
+            .Include(team => team.Leagues)
+            .ToListAsync();
     }
 
     public async Task AddAsync(Team team)
@@ -32,10 +43,10 @@ public class TeamRepository : ITeamRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(Team team)
+    public async Task UpdateAsync(Team team, CancellationToken cancellationToken = default)
     {
         _context.Teams.Update(team);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<bool> DeleteAsync(int id)

@@ -1,0 +1,19 @@
+# .NET build output
+**/bin/
+**/obj/
+**/out/
+**/artifacts/
+
+# Visual Studio user state
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Test output
+TestResults/
+
+# Local configuration and secrets
+secrets.json
+appsettings.Local.json

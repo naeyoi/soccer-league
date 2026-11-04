@@ -1,0 +1,77 @@
+<h2>{{ leagueId === null ? 'Create League' : 'Edit League' }}</h2>
+
+<form [formGroup]="leagueForm" (ngSubmit)="createLeague()" novalidate>
+  @if (loadingLeague) {
+    <p>Loading league...</p>
+  }
+
+  <mat-form-field appearance="outline">
+    <mat-label>Name</mat-label>
+    <input matInput formControlName="name" maxlength="50" />
+    @if (leagueForm.controls.name.hasError('required') || leagueForm.controls.name.hasError('pattern')) {
+      <mat-error>Name is required.</mat-error>
+    } @else if (leagueForm.controls.name.hasError('maxlength')) {
+      <mat-error>Name cannot exceed 50 characters.</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Country</mat-label>
+    <input matInput formControlName="country" maxlength="50" />
+    @if (leagueForm.controls.country.hasError('required') || leagueForm.controls.country.hasError('pattern')) {
+      <mat-error>Country is required.</mat-error>
+    } @else if (leagueForm.controls.country.hasError('maxlength')) {
+      <mat-error>Country cannot exceed 50 characters.</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Start Date</mat-label>
+    <input matInput type="date" formControlName="startDate" min="1753-01-01" max="9999-12-31" />
+    @if (leagueForm.controls.startDate.hasError('required')) {
+      <mat-error>Start date is required.</mat-error>
+    } @else if (leagueForm.controls.startDate.hasError('sqlDateRange')) {
+      <mat-error>Date must be between 1753-01-01 and 9999-12-31.</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>End Date</mat-label>
+    <input matInput type="date" formControlName="endDate" min="1753-01-01" max="9999-12-31" />
+    @if (leagueForm.controls.endDate.hasError('required')) {
+      <mat-error>End date is required.</mat-error>
+    } @else if (leagueForm.controls.endDate.hasError('sqlDateRange')) {
+      <mat-error>Date must be between 1753-01-01 and 9999-12-31.</mat-error>
+    } @else if (leagueForm.controls.endDate.hasError('endDateBeforeStartDate')) {
+      <mat-error>End date must be on or after start date.</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Teams</mat-label>
+    <mat-select formControlName="teamIds" multiple>
+      @for (team of teams; track team.id) {
+        <mat-option [value]="team.id">{{ team.name }} ({{ team.country }})</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (leagueId !== null) {
+    <mat-slide-toggle formControlName="enabled">Enabled</mat-slide-toggle>
+  }
+
+  @if (errorMessage) {
+    <p class="form-error" role="alert">{{ errorMessage }}</p>
+  }
+
+  <div class="form-actions">
+    <button mat-button type="button" routerLink="/leagues" [disabled]="submitting">Cancel</button>
+    <button mat-flat-button type="submit" [disabled]="submitting || loadingLeague || !relatedDataReady">
+      @if (submitting) {
+        {{ leagueId === null ? 'Creating...' : 'Saving...' }}
+      } @else {
+        {{ leagueId === null ? 'Create' : 'Save' }}
+      }
+    </button>
+  </div>
+</form>

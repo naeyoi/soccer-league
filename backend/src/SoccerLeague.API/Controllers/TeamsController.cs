@@ -37,10 +37,15 @@ public class TeamsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<int>> Create([FromBody] CreateTeamDto createDto)
     {
-        var teamId = await _teamService.CreateTeamAsync(createDto);
-        
-        // Retorna un código 201 Created y apunta a la ruta GetById para consultar el recurso creado
-        return CreatedAtAction(nameof(GetById), new { id = teamId }, new { id = teamId });
+        try
+        {
+            var teamId = await _teamService.CreateTeamAsync(createDto);
+            return CreatedAtAction(nameof(GetById), new { id = teamId }, new { id = teamId });
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Una o más ligas seleccionadas no existen." });
+        }
     }
 
     [HttpPut("{id:int}")]
@@ -57,7 +62,27 @@ public class TeamsController : ControllerBase
         }
         catch (KeyNotFoundException)
         {
-            return NotFound(new { message = $"No se puede actualizar. El equipo con ID {id} no existe." });
+            return NotFound(new { message = $"El equipo con ID {id} o una de las ligas seleccionadas no existe." });
+        }
+
+        return NoContent();
+    }
+
+    [HttpPatch("{id:int}/enabled")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SetEnabled(
+        int id,
+        [FromBody] SetTeamEnabledRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _teamService.SetTeamEnabledAsync(id, request.Enabled, cancellationToken);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = $"El equipo con ID {id} no fue encontrado." });
         }
 
         return NoContent();

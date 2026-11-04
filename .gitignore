@@ -1,31 +1,17 @@
-# Build output
-**/bin/
-**/obj/
-**/out/
-**/artifacts/
-
-# Visual Studio and VS Code user state
-.vs/
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
+# VS Code workspace settings
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
 
 # Test and coverage output
-TestResults/
 coverage/
 *.coverage
 *.coveragexml
 
-# Local environment and secrets
+# Local environment files
 .env
 .env.*
 !.env.example
-secrets.json
-appsettings.Local.json
 
 # Logs and temporary files
 *.log

@@ -9,12 +9,18 @@ namespace SoccerLeague.Application.Services;
 public class TeamService : ITeamService
 {
     private readonly ITeamRepository _teamRepository;
+    private readonly ILeagueRepository _leagueRepository;
     private readonly IValidator<CreateTeamDto> _createValidator;
     private readonly IValidator<UpdateTeamDto> _updateValidator;
 
-    public TeamService(ITeamRepository teamRepository, IValidator<CreateTeamDto> createValidator, IValidator<UpdateTeamDto> updateValidator)
+    public TeamService(
+        ITeamRepository teamRepository,
+        ILeagueRepository leagueRepository,
+        IValidator<CreateTeamDto> createValidator,
+        IValidator<UpdateTeamDto> updateValidator)
     {
         _teamRepository = teamRepository;
+        _leagueRepository = leagueRepository;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
     }
@@ -28,7 +34,8 @@ public class TeamService : ITeamService
             t.Name,
             t.Country,
             t.PlayersQuantity,
-            t.Enabled
+            t.Enabled,
+            t.Leagues.Select(league => league.Id).ToArray()
         ));
     }
 
@@ -42,7 +49,8 @@ public class TeamService : ITeamService
             team.Name,
             team.Country,
             team.PlayersQuantity,
-            team.Enabled
+            team.Enabled,
+            team.Leagues.Select(league => league.Id).ToArray()
         );
     }
 
@@ -55,12 +63,14 @@ public class TeamService : ITeamService
             throw new ValidationException(validationResult.Errors);
         }
 
+        var leagues = await GetLeaguesAsync(createDto.LeagueIds);
         var team = new Team
         {
             Name = createDto.Name,
             Country = createDto.Country,
             PlayersQuantity = createDto.PlayersQuantity,
-            Enabled = true
+            Enabled = true,
+            Leagues = leagues
         };
 
         await _teamRepository.AddAsync(team);
@@ -81,12 +91,40 @@ public class TeamService : ITeamService
             throw new KeyNotFoundException($"El equipo con ID {updateDto.Id} no existe.");
         }
 
+        var leagues = updateDto.LeagueIds is null
+            ? existingTeam.Leagues.ToList()
+            : await GetLeaguesAsync(updateDto.LeagueIds);
         existingTeam.Name = updateDto.Name;
         existingTeam.Country = updateDto.Country;
         existingTeam.PlayersQuantity = updateDto.PlayersQuantity;
         existingTeam.Enabled = updateDto.Enabled;
+        existingTeam.Leagues = leagues;
 
         await _teamRepository.UpdateAsync(existingTeam);
+    }
+
+    public async Task SetTeamEnabledAsync(int id, bool enabled, CancellationToken cancellationToken)
+    {
+        var team = await _teamRepository.GetByIdAsync(id, cancellationToken);
+        if (team is null)
+        {
+            throw new KeyNotFoundException($"El equipo con ID {id} no existe.");
+        }
+
+        team.Enabled = enabled;
+        await _teamRepository.UpdateAsync(team, cancellationToken);
+    }
+
+    private async Task<List<League>> GetLeaguesAsync(IReadOnlyCollection<int>? leagueIds)
+    {
+        var distinctLeagueIds = (leagueIds ?? Array.Empty<int>()).Distinct().ToArray();
+        var leagues = await _leagueRepository.GetByIdsAsync(distinctLeagueIds);
+        if (leagues.Count != distinctLeagueIds.Length)
+        {
+            throw new KeyNotFoundException("Una o más ligas seleccionadas no existen.");
+        }
+
+        return leagues.ToList();
     }
 
     public async Task<bool> DeleteTeamAsync(int id)

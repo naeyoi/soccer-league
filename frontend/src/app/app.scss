@@ -1,0 +1,23 @@
+mat-toolbar {
+  background-color: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
+
+.brand {
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: 500;
+}
+
+.mat-toolbar a[mat-button] {
+  color: var(--mat-sys-on-primary-container);
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.page-content {
+  padding: 1.5rem;
+}

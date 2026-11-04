@@ -1,0 +1,8 @@
+<h2 mat-dialog-title>Delete {{ data.entityType }}</h2>
+<mat-dialog-content>
+  Are you sure you want to delete "{{ data.entityName }}"? This action cannot be undone.
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" class="cancel-button" (click)="cancel()">Cancel</button>
+  <button mat-flat-button type="button" class="confirm-delete-button" (click)="confirm()">Delete</button>
+</mat-dialog-actions>

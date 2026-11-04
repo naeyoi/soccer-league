@@ -38,8 +38,15 @@ public class LeaguesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<int>> Create([FromBody] CreateLeagueDto createDto)
     {
-        var leagueId = await _leagueService.CreateLeagueAsync(createDto);
-        return CreatedAtAction(nameof(GetById), new { id = leagueId }, new { id = leagueId });
+        try
+        {
+            var leagueId = await _leagueService.CreateLeagueAsync(createDto);
+            return CreatedAtAction(nameof(GetById), new { id = leagueId }, new { id = leagueId });
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Uno o más equipos seleccionados no existen." });
+        }
     }
 
     [HttpPut("{id:int}")]
@@ -56,7 +63,27 @@ public class LeaguesController : ControllerBase
         }
         catch (KeyNotFoundException)
         {
-            return NotFound(new { message = $"No se puede actualizar. La liga con ID {id} no existe." });
+            return NotFound(new { message = $"La liga con ID {id} o uno de los equipos seleccionados no existe." });
+        }
+
+        return NoContent();
+    }
+
+    [HttpPatch("{id:int}/enabled")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SetEnabled(
+        int id,
+        [FromBody] SetLeagueEnabledRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _leagueService.SetLeagueEnabledAsync(id, request.Enabled, cancellationToken);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = $"La liga con ID {id} no fue encontrada." });
         }
 
         return NoContent();

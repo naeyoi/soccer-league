@@ -1,0 +1,67 @@
+<h2>{{ teamId === null ? 'Create Team' : 'Edit Team' }}</h2>
+
+<form [formGroup]="teamForm" (ngSubmit)="saveTeam()" novalidate>
+  @if (loadingTeam) {
+    <p>Loading team...</p>
+  }
+
+  <mat-form-field appearance="outline">
+    <mat-label>Name</mat-label>
+    <input matInput formControlName="name" maxlength="50" />
+    @if (teamForm.controls.name.hasError('required') || teamForm.controls.name.hasError('pattern')) {
+      <mat-error>Name is required.</mat-error>
+    } @else if (teamForm.controls.name.hasError('maxlength')) {
+      <mat-error>Name cannot exceed 50 characters.</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Country</mat-label>
+    <input matInput formControlName="country" maxlength="50" />
+    @if (teamForm.controls.country.hasError('required') || teamForm.controls.country.hasError('pattern')) {
+      <mat-error>Country is required.</mat-error>
+    } @else if (teamForm.controls.country.hasError('maxlength')) {
+      <mat-error>Country cannot exceed 50 characters.</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Players Quantity</mat-label>
+    <input matInput type="number" step="1" min="11" max="22" formControlName="playersQuantity" />
+    @if (teamForm.controls.playersQuantity.hasError('required')) {
+      <mat-error>Players quantity is required.</mat-error>
+    } @else if (teamForm.controls.playersQuantity.hasError('pattern')) {
+      <mat-error>Players quantity must be a whole number.</mat-error>
+    } @else if (teamForm.controls.playersQuantity.hasError('min') || teamForm.controls.playersQuantity.hasError('max')) {
+      <mat-error>Players quantity must be between 11 and 22.</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Leagues</mat-label>
+    <mat-select formControlName="leagueIds" multiple>
+      @for (league of leagues; track league.id) {
+        <mat-option [value]="league.id">{{ league.name }} ({{ league.country }})</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (teamId !== null) {
+    <mat-slide-toggle formControlName="enabled">Enabled</mat-slide-toggle>
+  }
+
+  @if (errorMessage) {
+    <p class="form-error" role="alert">{{ errorMessage }}</p>
+  }
+
+  <div class="form-actions">
+    <button mat-button type="button" routerLink="/teams" [disabled]="submitting">Cancel</button>
+    <button mat-flat-button type="submit" [disabled]="submitting || loadingTeam || !relatedDataReady">
+      @if (submitting) {
+        {{ teamId === null ? 'Creating...' : 'Saving...' }}
+      } @else {
+        {{ teamId === null ? 'Create' : 'Save' }}
+      }
+    </button>
+  </div>
+</form>
