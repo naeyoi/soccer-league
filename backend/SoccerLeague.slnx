@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SoccerLeague.API/SoccerLeague.API.csproj" />
+    <Project Path="src/SoccerLeague.Application/SoccerLeague.Application.csproj" />
+    <Project Path="src/SoccerLeague.Domain/SoccerLeague.Domain.csproj" />
+    <Project Path="src/SoccerLeague.Infrastructure/SoccerLeague.Infrastructure.csproj" />
+  </Folder>
+</Solution>
